@@ -1,7 +1,6 @@
 import React, {Component} from "react";
 import CardList from "./CardList";
 import SearchBox from "./SearchBox";
-import { robots } from "./robots";
 import styled from 'styled-components';
 
 const GlobalStyle = styled.div`
@@ -11,11 +10,19 @@ const GlobalStyle = styled.div`
 // We use this sintax to allow components to interact 
 class App extends Component{
     constructor(){
-        super()
+        super();
         this.state = {
-            robots: robots,
+            robots: [],
             searchfield : ''
         }
+    }
+
+    // componentDidMount -- fetch users from url and decode into json
+    // !no nead of arrow function bc its part of React lifecycle methods
+    componentDidMount() {
+        fetch('https://jsonplaceholder.typicode.com/users')
+            .then(response => response.json())
+            .then(users => this.setState({robots: users}))
     }
 
     onSearchChange = (event) => {
@@ -26,15 +33,20 @@ class App extends Component{
         const filteredRobots = this.state.robots.filter(robots => {
             return robots.name.toLowerCase().includes(this.state.searchfield.toLowerCase())
         })
-        return (
-            <div className="tc">
-                <GlobalStyle>
-                    <h1 className="f-headline lh-solid">RoboFriends</h1>
-                    <SearchBox searchChange={this.onSearchChange} />
-                    <CardList robots={filteredRobots} />
-                </GlobalStyle>
-            </div>
-        )
+        if (this.state.robots.length === 0) {
+            return <h1>Loading...</h1>
+        } else {
+            return (
+                <div className="tc">
+                    <GlobalStyle>
+                        <h1 className="f-headline lh-solid">RoboFriends</h1>
+                        <SearchBox searchChange={this.onSearchChange} />
+                        <CardList robots={filteredRobots} />
+                    </GlobalStyle>
+                </div>
+            )
+        }
+        
     }
 }
    
